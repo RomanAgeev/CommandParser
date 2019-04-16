@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Guards;
 
-namespace ParallelZipNet.Commands {
+namespace CommandParser {
     public class Command {        
         readonly Action<IEnumerable<Option>> action;        
         readonly List<Section> optionalSections = new List<Section>();

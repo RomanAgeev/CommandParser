@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using ParallelZipNet.Commands;
 using Xunit;
 
-namespace ParallelZipNet.Tests.Commands {
+namespace CommandParser.Tests {
     public class OptionTests {
         [Theory]
         [InlineData("First")]

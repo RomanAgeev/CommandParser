@@ -3,10 +3,9 @@ using System.Linq;
 using System.Collections.Generic;
 using FakeItEasy;
 using FluentAssertions;
-using ParallelZipNet.Commands;
 using Xunit;
 
-namespace ParallelZipNet.Tests.Commands {
+namespace CommandParser.Tests {
     public class CommandTests {
         const string WRONG = "WRONG";
 

@@ -1,6 +1,6 @@
 using System;
 
-namespace ParallelZipNet.Commands {
+namespace CommandParser {
     public class UnknownCommandException : Exception {
     }
 }

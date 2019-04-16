@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Guards;
 
-namespace ParallelZipNet.Commands {
+namespace CommandParser {
     public class Section {
         readonly string name;
         readonly string[] keys;

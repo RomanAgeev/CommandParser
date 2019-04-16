@@ -1,9 +1,8 @@
 using System.Linq;
 using FluentAssertions;
-using ParallelZipNet.Commands;
 using Xunit;
 
-namespace ParallelZipNet.Tests.Commands {
+namespace CommandParser.Tests {
     public class SectionTests {
         [Theory]
         [InlineData(1)]

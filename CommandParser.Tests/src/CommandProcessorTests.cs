@@ -1,11 +1,10 @@
-using ParallelZipNet.Commands;
 using Xunit;
 using FakeItEasy;
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
 
-namespace ParallelZipNet.Tests.Commands {
+namespace CommandParser.Tests {
     public class CommandProccessorTests {
         CommandProcessor processor = new CommandProcessor();
         Action<IEnumerable<Option>> operation1 = A.Fake<Action<IEnumerable<Option>>>();

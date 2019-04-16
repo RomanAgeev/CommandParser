@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ParallelZipNet.Commands {
+namespace CommandParser {
     public class CommandProcessor {
         readonly List<Command> commands = new List<Command>();
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Guards;
 
-namespace ParallelZipNet.Commands {
+namespace CommandParser {
     public class Option {
         readonly string name;
         readonly Dictionary<string, string> parameters = new Dictionary<string, string>();
