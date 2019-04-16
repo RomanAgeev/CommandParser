@@ -1,0 +1,19 @@
+language: csharp
+mono: none
+os: linux
+dist: xenial
+dotnet: 2.1.4
+script:
+- dotnet build -c Release
+- dotnet test CommandParser.Tests
+- dotnet pack CommandParser -c Release
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: dotnet nuget push ./CommandParser/bin/Release/RA_CommandParser.*.nupkg -k $MYGET_API_KEY -s https://www.myget.org/F/romanageev-ci/api/v2/package
+  on:
+    tags: true
+    condition: $TRAVIS_TAG =~ -release$
+env:
+  global:
+    secure: YDnAEydcK6x0I0QjnO0UJ2+Mbbon8luuy4n7J5+6ar3hMeKUXAmZpjLmCictR8CILDGfYKtyfpaRcpDQy1ir0SM9vmx8D+hoyAWmiI5MnpDH282OoC6TG8kHXr9t7hnOK6yhYDuakRyLzZ+wTeBSL3Qp+AD4co49e0Q/Cg4dAtHlycM8Rc0j9PTmzMImqHIsHsBU62JEgOcmtooIq4mggh4COrP4YDHfzimm7yZXzXeIVI5kd1alfxqTsaqRKjBjXV0CT0Bb9+3nDCvgmTa0tCvH5bhSRUYCdv0Br82fox6CA34Ir/tOkvudqM0+f5QrBlLCugxZzhmkJwc5zBYowmaIt133gLgCr7f7a/GIAHGce/vHN39qgU0LMEPj4V1yo2EcoeY3ONDgKOOGUW9uYS4jhYI38BixNHMgyXzrNely+nkWKTPePabnhgFltz4Oy8muUs6ESa6FuI73Lcu8OUlnUioCmiNkRmGZuWLCzvQ0HIXZpEmiiJBMrZiwoBxGlBJ7g6EggkVY/6wfq9ruCO42tJTUjqBCxSpe7yWvZ4sLLAcYNONJSCBzfNA+OAxtV/JgU6HlTJgncvNkiXibFTcsekLcicY0nuP0HMiToWmU6OBQJA5ThzOXnB4RMABr67nBYsqPa5LD6Ulisb/WIdwpuaa6SXOuoKi1MylakK4=
