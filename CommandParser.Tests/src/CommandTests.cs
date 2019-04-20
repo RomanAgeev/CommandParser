@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using FakeItEasy;
 using FluentAssertions;
 using Xunit;
+using System.Dynamic;
 
 namespace CommandParser.Tests {
     public class CommandTests {
@@ -64,7 +65,7 @@ namespace CommandParser.Tests {
 
         [Fact]
         public void WithParameters_Test() {
-            var fakeOperation = A.Fake<Action<IEnumerable<Option>>>();
+            var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
                 .Required("FIRST",
@@ -82,16 +83,17 @@ namespace CommandParser.Tests {
             success.Should().BeTrue();            
             action.Should().NotBeNull();
 
-            A.CallTo(() => fakeOperation.Invoke(A<IEnumerable<Option>>._)).Invokes((IEnumerable<Option> options) => {                
-                var firstOption = options.Single(x => x.Name == "FIRST");
-                var secondOption = options.Single(x => x.Name == "SECOND");
-                firstOption.GetStringParam("firstParam").Should().Be("A");
-                secondOption.GetStringParam("secondParam").Should().Be("B");
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject options) => {
+                string firstParam = ((dynamic)options).FIRST.firstParam;
+                string secondParam = ((dynamic)options).SECOND.secondParam;
+
+                firstParam.Should().Be("A");
+                secondParam.Should().Be("B");
             });            
 
             action();
 
-            A.CallTo(() => fakeOperation.Invoke(A<IEnumerable<Option>>._)).MustHaveHappened();            
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).MustHaveHappened();            
         }
 
         [Theory]
@@ -99,7 +101,7 @@ namespace CommandParser.Tests {
         [InlineData("")]
         [InlineData("Any")]
         public void EmptyCommand_Test(params string[] args) {
-            var fakeOperation = A.Fake<Action<IEnumerable<Option>>>();
+            var fakeOperation = A.Fake<Action<ExpandoObject>>();
             var command = new Command(fakeOperation);
 
             bool success = command.TryParse(args ?? new string[0], out Action action);
@@ -109,7 +111,7 @@ namespace CommandParser.Tests {
         }
 
         void Assert_NoParameters_Success(bool withRequiredSection, string[] args) {
-            var fakeOperation = A.Fake<Action<IEnumerable<Option>>>();
+            var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
                 .Optional("second", section => section.WithKeys("second"))
@@ -123,7 +125,7 @@ namespace CommandParser.Tests {
             success.Should().BeTrue();            
             action.Should().NotBeNull();
 
-            A.CallTo(() => fakeOperation.Invoke(A<IEnumerable<Option>>._)).Invokes((IEnumerable<Option> options) => {
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject options) => {
                 var expected = new List<string>();
                 foreach(var arg in args) {
                     if(arg != "WRONG")
@@ -132,16 +134,16 @@ namespace CommandParser.Tests {
                         break;
                 }                
 
-                options.Select(x => x.Name).Should().Equal(expected);                
+                options.Select(x => x.Key).Should().Equal(expected);                
             });            
 
             action();
 
-            A.CallTo(() => fakeOperation.Invoke(A<IEnumerable<Option>>._)).MustHaveHappened();
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).MustHaveHappened();
         }
         
         void Assert_NoParameters_Fail(bool withRequiredSection, string[] args) {
-            var fakeOperation = A.Fake<Action<IEnumerable<Option>>>();
+            var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
                 .Optional("second", section => section.WithKeys("second"))

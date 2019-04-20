@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using Guards;
 
@@ -10,6 +11,7 @@ namespace CommandParser {
         readonly List<string> _param = new List<string>();
 
         public int Length => _param.Count + 1;
+        public string Name => _name;
 
         public Section(string name) {
             Guard.NotNullOrWhiteSpace(name, nameof(name));
@@ -31,14 +33,16 @@ namespace CommandParser {
             return this;
         }
 
-        public bool TryParse(string[] args, out Option option) {
+        public bool TryParse(string[] args, out ExpandoObject option) {
             Guard.NotNull(args, nameof(args));
 
             if(args.Length >= _param.Count + 1) {
                 if(_keys.Contains(args[0])) {
-                    option = new Option(_name);
+                   option = new ExpandoObject();
+                   var optionDict = (IDictionary<string, object>)option;
                     for(int i = 0; i < _param.Count; i++)
-                        option.AddParameter(_param[i], args[i + 1]);
+                        optionDict[_param[i]] = args[i + 1];
+
                     return true;
                 }
             }

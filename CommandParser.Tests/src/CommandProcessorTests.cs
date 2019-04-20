@@ -3,12 +3,13 @@ using FakeItEasy;
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
+using System.Dynamic;
 
 namespace CommandParser.Tests {
     public class CommandProccessorTests {
         CommandProcessor processor = new CommandProcessor();
-        Action<IEnumerable<Option>> operation1 = A.Fake<Action<IEnumerable<Option>>>();
-        Action<IEnumerable<Option>> operation2 = A.Fake<Action<IEnumerable<Option>>>();
+        Action<ExpandoObject> operation1 = A.Fake<Action<ExpandoObject>>();
+        Action<ExpandoObject> operation2 = A.Fake<Action<ExpandoObject>>();
 
         public CommandProccessorTests() {
             processor.Register(operation1).Required("operation1", section => section.WithKeys("operation1"));
@@ -25,8 +26,8 @@ namespace CommandParser.Tests {
             action1();
             action2();
 
-            A.CallTo(() => operation1.Invoke(A<IEnumerable<Option>>._)).MustHaveHappened();
-            A.CallTo(() => operation2.Invoke(A<IEnumerable<Option>>._)).MustHaveHappened();
+            A.CallTo(() => operation1.Invoke(A<ExpandoObject>._)).MustHaveHappened();
+            A.CallTo(() => operation2.Invoke(A<ExpandoObject>._)).MustHaveHappened();
         }
 
         [Fact]

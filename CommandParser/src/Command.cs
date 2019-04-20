@@ -2,14 +2,15 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using Guards;
+using System.Dynamic;
 
 namespace CommandParser {
     public class Command {
-        readonly Action<IEnumerable<Option>> action;        
+        readonly Action<ExpandoObject> action;        
         readonly List<Section> optionalSections = new List<Section>();
         Section requiredSection;
 
-        public Command(Action<IEnumerable<Option>> action) {
+        public Command(Action<ExpandoObject> action) {
             Guard.NotNull(action, nameof(action));
 
             this.action = action;
@@ -33,12 +34,13 @@ namespace CommandParser {
         public bool TryParse(string[] args, out Action action) {
             Guard.NotNull(args, nameof(args));
 
-            var options = new List<Option>();
+            var options = new ExpandoObject();
+            var optionsDict = (IDictionary<string, object>)options;
             int offset = 0;            
 
             if(requiredSection != null) {                
-                if(requiredSection.TryParse(args, out Option required)) {
-                    options.Add(required);
+                if(requiredSection.TryParse(args, out ExpandoObject required)) {
+                    optionsDict[requiredSection.Name] = required;
                     offset += requiredSection.Length;                    
                 }
                 else {
@@ -47,14 +49,14 @@ namespace CommandParser {
                 }
             }
 
-            Option optional;
+            ExpandoObject optional;
             List<Section> parsedSections = new List<Section>();
             do {
                 optional = null;                
                 string[] sectionArgs = args.Skip(offset).ToArray();
                 foreach(var optionalSection in optionalSections.Except(parsedSections)) {
                     if(optionalSection.TryParse(sectionArgs, out optional)) {
-                        options.Add(optional);
+                        optionsDict[optionalSection.Name] = optional;
                         offset += optionalSection.Length;
                         parsedSections.Add(optionalSection);
                         break;
@@ -63,7 +65,7 @@ namespace CommandParser {
             }
             while(optional != null && offset < args.Length);
             
-            if(options.Count > 0) {                 
+            if(optionsDict.Count > 0) {                 
                 action = () => this.action(options);
                 return true;
             }
