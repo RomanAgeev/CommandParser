@@ -12,7 +12,10 @@ namespace CommandParser.Tests {
             var keys = Enumerable.Range(1, keyCount).Select(i => $"--testKey{i}").ToArray();
             var values = Enumerable.Range(1, keyCount).Select(i => $"--testValue{i}").ToArray();
 
-            var section = new Section("TestName", keys, values);
+            var section = new Section("TestName")
+                .WithKeys(keys);
+            foreach(var value in values)
+                section = section.WithParameter(value);            
 
             section.Length.Should().Be(keyCount + 1);
         }
@@ -22,7 +25,8 @@ namespace CommandParser.Tests {
         [InlineData("--full-key")]
         [InlineData("--full-key", "abc", " ")]
         public void TryParse_NoParams_Success_Test(params string[] args) {
-            var section = new Section("Test", new[] { "--full-key", "-k" }, new string[0]);
+            var section = new Section("Test")
+                .WithKeys("--full-key", "-k");            
 
             bool success = section.TryParse(args, out Option option);
             success.Should().BeTrue();
@@ -34,7 +38,10 @@ namespace CommandParser.Tests {
         [InlineData("--full-key", "1", "A")]
         [InlineData("--full-key", "1", "A", "abc", " ")]
         public void TryParse_WithParams_Success_Tetst(params string[] args) {
-            var section = new Section("Test", new[] { "--full-key" }, new[] { "x", "y" });
+            var section = new Section("Test")
+                .WithKeys("--full-key")
+                .WithParameter("x")
+                .WithParameter("y");
 
             bool success = section.TryParse(args, out Option option);
             success.Should().BeTrue();
@@ -49,7 +56,10 @@ namespace CommandParser.Tests {
         [InlineData("--full-key", "1")]
         [InlineData("")]
         public void TryParse_Fail_Test(params string[] args) {
-            var section = new Section("Test", new[] { "--full-key" }, new[] { "x", "y" });
+            var section = new Section("Test")
+                .WithKeys("--full-key")
+                .WithParameter("x")
+                .WithParameter("y");
 
             bool success = section.TryParse(args, out Option option);
             success.Should().BeFalse();

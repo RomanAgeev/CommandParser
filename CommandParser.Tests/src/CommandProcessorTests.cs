@@ -11,8 +11,8 @@ namespace CommandParser.Tests {
         Action<IEnumerable<Option>> operation2 = A.Fake<Action<IEnumerable<Option>>>();
 
         public CommandProccessorTests() {
-            processor.Register(operation1).Required("operation1");
-            processor.Register(operation2).Required("operation2");
+            processor.Register(operation1).Required("operation1", section => section.WithKeys("operation1"));
+            processor.Register(operation2).Required("operation2", section => section.WithKeys("operation2"));
         }
 
         [Fact]

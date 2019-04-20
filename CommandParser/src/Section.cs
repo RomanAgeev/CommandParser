@@ -5,30 +5,40 @@ using Guards;
 
 namespace CommandParser {
     public class Section {
-        readonly string name;
-        readonly string[] keys;
-        readonly string[] param;
+        readonly string _name;
+        readonly List<string> _keys = new List<string>();
+        readonly List<string> _param = new List<string>();
 
-        public int Length => param.Length + 1;
+        public int Length => _param.Count + 1;
 
-        public Section(string name, string[] keys, string[] param) {
+        public Section(string name) {
             Guard.NotNullOrWhiteSpace(name, nameof(name));
+
+            _name = name;
+        }
+
+        public Section WithKeys(params string[] keys) {
             Guard.NotNullOrEmpty(keys, nameof(keys));
+
+            _keys.AddRange(keys);
+            return this;
+        }
+
+        public Section WithParameter(string param) {
             Guard.NotNull(param, nameof(param));
 
-            this.name = name;
-            this.keys = keys;
-            this.param = param;
+            _param.Add(param);
+            return this;
         }
 
         public bool TryParse(string[] args, out Option option) {
             Guard.NotNull(args, nameof(args));
 
-            if(args.Length >= param.Length + 1) {
-                if(keys.Contains(args[0])) {
-                    option = new Option(name);
-                    for(int i = 0; i < param.Length; i++)
-                        option.AddParameter(param[i], args[i + 1]);
+            if(args.Length >= _param.Count + 1) {
+                if(_keys.Contains(args[0])) {
+                    option = new Option(_name);
+                    for(int i = 0; i < _param.Count; i++)
+                        option.AddParameter(_param[i], args[i + 1]);
                     return true;
                 }
             }

@@ -67,8 +67,14 @@ namespace CommandParser.Tests {
             var fakeOperation = A.Fake<Action<IEnumerable<Option>>>();
 
             var command = new Command(fakeOperation)
-                .Required("FIRST", new[] { "--firstKey" }, new[] { "firstParam" } )
-                .Optional("SECOND", new[] { "--secondKey" }, new[] { "secondParam" });
+                .Required("FIRST",
+                    section => section
+                        .WithKeys("--firstKey")
+                        .WithParameter("firstParam"))
+                .Optional("SECOND",
+                    section => section
+                        .WithKeys("--secondKey")
+                        .WithParameter("secondParam"));
 
             var args = new[] { "--firstKey", "A", "--secondKey", "B" };
             bool success = command.TryParse(args, out Action action);
@@ -106,11 +112,11 @@ namespace CommandParser.Tests {
             var fakeOperation = A.Fake<Action<IEnumerable<Option>>>();
 
             var command = new Command(fakeOperation)
-                .Optional("second")
-                .Optional("third");
+                .Optional("second", section => section.WithKeys("second"))
+                .Optional("third", section => section.WithKeys("third"));
 
             if(withRequiredSection)
-                command = command.Required("first");
+                command = command.Required("first", section => section.WithKeys("first"));
 
             bool success = command.TryParse(args, out Action action);
 
@@ -138,11 +144,11 @@ namespace CommandParser.Tests {
             var fakeOperation = A.Fake<Action<IEnumerable<Option>>>();
 
             var command = new Command(fakeOperation)
-                .Optional("second")
-                .Optional("third");
+                .Optional("second", section => section.WithKeys("second"))
+                .Optional("third", section => section.WithKeys("third"));
 
             if(withRequiredSection)
-                command = command.Required("first");                
+                command = command.Required("first", section => section.WithKeys("first"));
 
             bool success = command.TryParse(args ?? new string[0], out Action action);
 

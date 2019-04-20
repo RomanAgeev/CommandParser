@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Guards;
 
 namespace CommandParser {
-    public class Command {        
+    public class Command {
         readonly Action<IEnumerable<Option>> action;        
         readonly List<Section> optionalSections = new List<Section>();
         Section requiredSection;
@@ -15,26 +15,22 @@ namespace CommandParser {
             this.action = action;
         }
 
-        public Command Required(string key) {
-            return Required(key, new[] { key }, new string[0]);
-        }
+        public Command Required(string name, Func<Section, Section> sectionSetup) {
+            Guard.NotNull(sectionSetup, nameof(sectionSetup));
 
-        public Command Required(string name, string[] keys, string[] param) {
-            requiredSection = new Section(name, keys, param);
+            requiredSection = sectionSetup(new Section(name));
             return this;
         }
 
-        public Command Optional(string key) {
-            return Optional(key, new[] { key }, new string[0]);
-        }
+        public Command Optional(string name, Func<Section, Section> sectionSetup) {
+            Guard.NotNull(sectionSetup, nameof(sectionSetup));
 
-        public Command Optional(string name, string[] keys, string[] param) {
-            var section = new Section(name, keys, param);
+            var section = sectionSetup(new Section(name));
             optionalSections.Add(section);
             return this;
         }
 
-         public bool TryParse(string[] args, out Action action) {
+        public bool TryParse(string[] args, out Action action) {
             Guard.NotNull(args, nameof(args));
 
             var options = new List<Option>();
