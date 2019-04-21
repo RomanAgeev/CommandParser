@@ -31,7 +31,7 @@ namespace CommandParser {
             return this;
         }
 
-        public bool TryParse(string[] args, out Action action) {
+        public Action Parse(string[] args) {
             Guard.NotNull(args, nameof(args));
 
             var options = new ExpandoObject();
@@ -41,14 +41,13 @@ namespace CommandParser {
             if(requiredSection.HasValue) {                
                 (string name, Section section) = requiredSection.Value;
 
-                if(section.TryParse(args, out ExpandoObject required)) {
+                var required = section.Parse(args);
+                if(required != null) {
                     optionsDict[name] = required;
-                    offset += section.Length;                    
+                    offset += section.Length;
                 }
-                else {
-                    action = null;
-                    return false;                    
-                }
+                else
+                    return null;                
             }
 
             ExpandoObject optional;
@@ -60,7 +59,8 @@ namespace CommandParser {
                 foreach(var optionalSection in optionalSections.Except(parsedSections)) {
                     (string name, Section section) = optionalSection;                    
 
-                    if(section.TryParse(sectionArgs, out optional)) {
+                    optional = section.Parse(sectionArgs);                    
+                    if(optional != null) {
                         optionsDict[name] = optional;
                         offset += section.Length;
                         parsedSections.Add(optionalSection);
@@ -70,14 +70,10 @@ namespace CommandParser {
             }
             while(optional != null && offset < args.Length);
             
-            if(optionsDict.Count > 0) {                 
-                action = () => this.action(options);
-                return true;
-            }
-            else {
-                action = null;
-                return false;            
-            }
+            if(optionsDict.Count > 0)
+                return () => this.action(options);
+
+            return null;
         }
     }
 }

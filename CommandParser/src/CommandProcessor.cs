@@ -14,11 +14,12 @@ namespace CommandParser {
         }
 
         public Action Parse(params string[] args) {
-            foreach(var command in commands) {                
-                if(command.TryParse(args, out Action action))
+            foreach(var command in commands) {
+                Action action = command.Parse(args);
+                if(action != null)
                     return action;
             }
-            throw new UnknownCommandException();            
+            return null;           
         }
     }
 }

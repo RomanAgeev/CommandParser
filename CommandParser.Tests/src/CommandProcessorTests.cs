@@ -32,9 +32,8 @@ namespace CommandParser.Tests {
 
         [Fact]
         public void Parse_Fail_Test() {
-            Action act = () => processor.Parse(new[] { "WRONG" });
-
-            act.Should().Throw<UnknownCommandException>();
+            processor.Parse(new[] { "WRONG" })
+                .Should().BeNull();
         }
     }
 }

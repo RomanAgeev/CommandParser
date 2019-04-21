@@ -24,22 +24,19 @@ namespace CommandParser.Tests {
         [InlineData("key", "abc", " ")]
         public void TryParse_NoParams_Success_Test(params string[] args) {
             new Section().WithKey("key")
-                .TryParse(args, out ExpandoObject option)
-                .Should().BeTrue();
-
-            option.Should().NotBeNull();
+                .Parse(args)
+                .Should().NotBeNull();
         }
 
         [Theory]
         [InlineData("key", "1", "A")]
         [InlineData("key", "1", "A", "abc", " ")]
         public void TryParse_WithParams_Success_Test(params string[] args) {
-            new Section()
+            var option = new Section()
                 .WithKey("key")
                 .WithInteger("X")
                 .WithString("Y")
-                .TryParse(args, out ExpandoObject option)
-                .Should().BeTrue();
+                .Parse(args);
 
             option.Should().NotBeNull();
 
@@ -57,10 +54,8 @@ namespace CommandParser.Tests {
                 .WithKey("key")
                 .WithInteger("X")
                 .WithString("Y")
-                .TryParse(args, out ExpandoObject option)
-                .Should().BeFalse();
-
-            option.Should().BeNull();            
+                .Parse(args)
+                .Should().BeNull();
         }
     }
 }

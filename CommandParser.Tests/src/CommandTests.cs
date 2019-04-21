@@ -65,7 +65,7 @@ namespace CommandParser.Tests {
 
             var args = new[] { "firstKey", "A", "secondKey", "B" };
 
-            new Command(fakeOperation)
+            Action action = new Command(fakeOperation)
                 .Required("First",
                     section => section
                         .WithKey("firstKey")
@@ -74,8 +74,7 @@ namespace CommandParser.Tests {
                     section => section
                         .WithKey("secondKey")
                         .WithString("SecondParam"))
-                .TryParse(args, out Action action)
-                .Should().BeTrue();
+                .Parse(args);
             
             action.Should().NotBeNull();
 
@@ -100,10 +99,8 @@ namespace CommandParser.Tests {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             new Command(fakeOperation)
-                .TryParse(args ?? new string[0], out Action action)
-                .Should().BeFalse();
-
-            action.Should().BeNull();            
+                .Parse(args ?? new string[0])
+                .Should().BeNull();
         }
 
         void Assert_NoParameters_Success(bool withRequiredSection, string[] args, string[] expectedOptions) {
@@ -116,8 +113,7 @@ namespace CommandParser.Tests {
             if(withRequiredSection)
                 command = command.Required("First", section => section.WithKey("first"));
 
-            command.TryParse(args, out Action action)
-                .Should().BeTrue();            
+            Action action = command.Parse(args);
 
             action.Should().NotBeNull();
 
@@ -139,10 +135,8 @@ namespace CommandParser.Tests {
             if(withRequiredSection)
                 command = command.Required("First", section => section.WithKey("first"));
 
-            command.TryParse(args ?? new string[0], out Action action)
-                .Should().BeFalse();            
-
-            action.Should().BeNull();
+            command.Parse(args ?? new string[0])
+                .Should().BeNull();
         }
     }
 }

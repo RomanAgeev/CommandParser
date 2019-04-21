@@ -46,12 +46,12 @@ namespace CommandParser {
             return this;
         }
 
-        public bool TryParse(string[] args, out ExpandoObject option) {
+        public ExpandoObject Parse(string[] args) {
             Guard.NotNull(args, nameof(args));
 
             if(args.Length > _param.Count) {
                 if(args[0] == _key) {
-                   option = new ExpandoObject();
+                   var option = new ExpandoObject();
                    var optionDict = (IDictionary<string, object>)option;
 
                     for(int i = 0; i < _param.Count; i++) {
@@ -59,12 +59,11 @@ namespace CommandParser {
                         optionDict[name] = parse(args[i + 1]);
                     }
 
-                    return true;
+                    return option;
                 }
             }
 
-            option = null;
-            return false;
+            return null;
         }
     }
 }
