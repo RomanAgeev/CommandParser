@@ -18,8 +18,8 @@ namespace CommandParser.Tests {
 
         [Fact]
         public void Parse_Success_Test() {
-            var action1 = processor.Parse(new[] { "--operation1" });
-            var action2 = processor.Parse(new[] { "--operation2" });
+            var action1 = processor.Parse(new[] { "operation1" });
+            var action2 = processor.Parse(new[] { "operation2" });
             action1.Should().NotBeNull();
             action2.Should().NotBeNull();
 

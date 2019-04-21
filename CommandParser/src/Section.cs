@@ -6,21 +6,16 @@ using Guards;
 
 namespace CommandParser {
     public class Section {
-        const string LongKeyPrefix = "--";
-        const string ShortKeyPrefix = "-";
-
         readonly List<(string, Func<string, object>)> _param = new List<(string, Func<string, object>)>();
 
-        string _longKey;
-        char? _shortKey;
+        string _key;
 
         public int Length => _param.Count + 1;
 
-        public Section WithKey(string longKey, char? shortKey = null) {
-            Guard.NotNullOrWhiteSpace(longKey, nameof(longKey));
+        public Section WithKey(string key) {
+            Guard.NotNullOrWhiteSpace(key, nameof(key));
             
-            _longKey = longKey;
-            _shortKey = shortKey;
+            _key = key;
             return this;
         }
 
@@ -55,7 +50,7 @@ namespace CommandParser {
             Guard.NotNull(args, nameof(args));
 
             if(args.Length > _param.Count) {
-                if(args[0] == $"{LongKeyPrefix}{_longKey}" || (_shortKey.HasValue && args[0] == $"{ShortKeyPrefix}{_shortKey}")) {
+                if(args[0] == _key) {
                    option = new ExpandoObject();
                    var optionDict = (IDictionary<string, object>)option;
 

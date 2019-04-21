@@ -8,66 +8,62 @@ using System.Dynamic;
 
 namespace CommandParser.Tests {
     public class CommandTests {
-        const string WRONG = "--WRONG";
-
         [Theory]
-        [InlineData("--first", "First")]
-        [InlineData("--first --WRONG", "First")]
-        [InlineData("--first --second", "First,Second")]
-        [InlineData("--first --WRONG --second", "First")]
-        [InlineData("--first --second --WRONG", "First,Second")]
-        [InlineData("--first --WRONG --third", "First")]
-        [InlineData("--first --third --WRONG", "First,Third")]
-        [InlineData("--first --second --third", "First,Second,Third")]
-        [InlineData("--first --third --second", "First,Third,Second")]
-        [InlineData("--first --second --third --WRONG", "First,Second,Third")]
-        [InlineData("--first --second --WRONG --third", "First,Second")]
-        [InlineData("--first --WRONG --second --third", "First")]
+        [InlineData("first", "First")]
+        [InlineData("first WRONG", "First")]
+        [InlineData("first second", "First,Second")]
+        [InlineData("first WRONG second", "First")]
+        [InlineData("first second WRONG", "First,Second")]
+        [InlineData("first WRONG third", "First")]
+        [InlineData("first third WRONG", "First,Third")]
+        [InlineData("first second third", "First,Second,Third")]
+        [InlineData("first third second", "First,Third,Second")]
+        [InlineData("first second third WRONG", "First,Second,Third")]
+        [InlineData("first second WRONG third", "First,Second")]
+        [InlineData("first WRONG second third", "First")]
         public void NoParameters_WithRequiredSection_Success_Test(string args, string expectedOptions) {
             Assert_NoParameters_Success(true, args.Split(" "), expectedOptions.Split(","));
         }
 
         [Theory]
-        [InlineData("--second", "Second")]
-        [InlineData("--second --WRONG", "Second")]
-        [InlineData("--third", "Third")]
-        [InlineData("--third --WRONG", "Third")]
-        [InlineData("--second --third", "Second,Third")]
-        [InlineData("--third --second", "Third,Second")]
-        [InlineData("--second --WRONG --third", "Second")]
-        [InlineData("--second --third --WRONG", "Second,Third")]
+        [InlineData("second", "Second")]
+        [InlineData("second WRONG", "Second")]
+        [InlineData("third", "Third")]
+        [InlineData("third WRONG", "Third")]
+        [InlineData("second third", "Second,Third")]
+        [InlineData("third second", "Third,Second")]
+        [InlineData("second WRONG third", "Second")]
+        [InlineData("second third WRONG", "Second,Third")]
         public void NoParameters_NoRequiredSection_Success_Test(string args, string expectedOptions) {         
             Assert_NoParameters_Success(false, args.Split(" "), expectedOptions.Split(","));
         }        
 
         [Theory]
-        [InlineData(null)]
         [InlineData("")]
-        [InlineData(WRONG)]
-        [InlineData(WRONG, "first")]
+        [InlineData("WRONG")]
+        [InlineData("WRONG first")]
         [InlineData("second")]
         [InlineData("third")]
-        [InlineData("second", "third")]
-        public void NoParameters_WithRequiredSection_Fail_Test(params string[] args) {
-            Assert_NoParameters_Fail(true, args);
+        [InlineData("second third")]
+        public void NoParameters_WithRequiredSection_Fail_Test(string args) {
+            Assert_NoParameters_Fail(true, args.Split(" "));
         }
 
         [Theory]
-        [InlineData(null)]
         [InlineData("")]
-        [InlineData(WRONG)]
-        [InlineData(WRONG, "second")]
-        [InlineData(WRONG, "third")]
-        [InlineData(WRONG, "second", "third")]
-        public void NoParameters_NoRequiredSection_Fail_Test(params string[] args) {
-            Assert_NoParameters_Fail(false, args);
+        [InlineData("WRONG")]
+        [InlineData("WRONG second")]
+        [InlineData("WRONG third")]
+        [InlineData("WRONG second third")]
+        public void NoParameters_NoRequiredSection_Fail_Test(string args) {
+            Assert_NoParameters_Fail(false, args.Split(" "));
         }
 
         [Fact]
         public void WithParameters_Test() {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
-            var args = new[] { "--firstKey", "A", "--secondKey", "B" };
+            var args = new[] { "firstKey", "A", "secondKey", "B" };
 
             new Command(fakeOperation)
                 .Required("First",
