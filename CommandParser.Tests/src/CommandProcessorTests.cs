@@ -12,14 +12,14 @@ namespace CommandParser.Tests {
         Action<ExpandoObject> operation2 = A.Fake<Action<ExpandoObject>>();
 
         public CommandProccessorTests() {
-            processor.Register(operation1).Required("operation1", section => section.WithKeys("operation1"));
-            processor.Register(operation2).Required("operation2", section => section.WithKeys("operation2"));
+            processor.Register(operation1).Required("Operation1", section => section.WithKey("operation1"));
+            processor.Register(operation2).Required("Operation2", section => section.WithKey("operation2"));
         }
 
         [Fact]
         public void Parse_Success_Test() {
-            var action1 = processor.Parse(new[] { "operation1" });
-            var action2 = processor.Parse(new[] { "operation2" });
+            var action1 = processor.Parse(new[] { "--operation1" });
+            var action2 = processor.Parse(new[] { "--operation2" });
             action1.Should().NotBeNull();
             action2.Should().NotBeNull();
 

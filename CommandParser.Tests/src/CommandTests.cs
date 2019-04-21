@@ -8,36 +8,36 @@ using System.Dynamic;
 
 namespace CommandParser.Tests {
     public class CommandTests {
-        const string WRONG = "WRONG";
+        const string WRONG = "--WRONG";
 
         [Theory]
-        [InlineData("first")]
-        [InlineData("first", WRONG)]
-        [InlineData("first", "second")]
-        [InlineData("first", WRONG, "second")]
-        [InlineData("first", "second", WRONG)]
-        [InlineData("first", WRONG, "third")]
-        [InlineData("first", "third", WRONG)]
-        [InlineData("first", "second", "third")]
-        [InlineData("first", "third", "second")]
-        [InlineData("first", "second", "third", WRONG)]
-        [InlineData("first", "second", WRONG, "third")]
-        [InlineData("first", WRONG, "second", "third")]
-        public void NoParameters_WithRequiredSection_Success_Test(params string[] args) {
-            Assert_NoParameters_Success(true, args);
+        [InlineData("--first", "First")]
+        [InlineData("--first --WRONG", "First")]
+        [InlineData("--first --second", "First,Second")]
+        [InlineData("--first --WRONG --second", "First")]
+        [InlineData("--first --second --WRONG", "First,Second")]
+        [InlineData("--first --WRONG --third", "First")]
+        [InlineData("--first --third --WRONG", "First,Third")]
+        [InlineData("--first --second --third", "First,Second,Third")]
+        [InlineData("--first --third --second", "First,Third,Second")]
+        [InlineData("--first --second --third --WRONG", "First,Second,Third")]
+        [InlineData("--first --second --WRONG --third", "First,Second")]
+        [InlineData("--first --WRONG --second --third", "First")]
+        public void NoParameters_WithRequiredSection_Success_Test(string args, string expectedOptions) {
+            Assert_NoParameters_Success(true, args.Split(" "), expectedOptions.Split(","));
         }
 
         [Theory]
-        [InlineData("second")]
-        [InlineData("second", WRONG)]
-        [InlineData("third")]
-        [InlineData("third", WRONG)]
-        [InlineData("second", "third")]
-        [InlineData("third", "second")]
-        [InlineData("second", WRONG, "third")]
-        [InlineData("second", "third", WRONG)]
-        public void NoParameters_NoRequiredSection_Success_Test(params string[] args) {         
-            Assert_NoParameters_Success(false, args);
+        [InlineData("--second", "Second")]
+        [InlineData("--second --WRONG", "Second")]
+        [InlineData("--third", "Third")]
+        [InlineData("--third --WRONG", "Third")]
+        [InlineData("--second --third", "Second,Third")]
+        [InlineData("--third --second", "Third,Second")]
+        [InlineData("--second --WRONG --third", "Second")]
+        [InlineData("--second --third --WRONG", "Second,Third")]
+        public void NoParameters_NoRequiredSection_Success_Test(string args, string expectedOptions) {         
+            Assert_NoParameters_Success(false, args.Split(" "), expectedOptions.Split(","));
         }        
 
         [Theory]
@@ -67,25 +67,25 @@ namespace CommandParser.Tests {
         public void WithParameters_Test() {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
-            var command = new Command(fakeOperation)
-                .Required("FIRST",
-                    section => section
-                        .WithKeys("--firstKey")
-                        .WithParameter("firstParam"))
-                .Optional("SECOND",
-                    section => section
-                        .WithKeys("--secondKey")
-                        .WithParameter("secondParam"));
-
             var args = new[] { "--firstKey", "A", "--secondKey", "B" };
-            bool success = command.TryParse(args, out Action action);
 
-            success.Should().BeTrue();            
+            new Command(fakeOperation)
+                .Required("First",
+                    section => section
+                        .WithKey("firstKey")
+                        .WithString("FirstParam"))
+                .Optional("Second",
+                    section => section
+                        .WithKey("secondKey")
+                        .WithString("SecondParam"))
+                .TryParse(args, out Action action)
+                .Should().BeTrue();
+            
             action.Should().NotBeNull();
 
             A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject options) => {
-                string firstParam = ((dynamic)options).FIRST.firstParam;
-                string secondParam = ((dynamic)options).SECOND.secondParam;
+                string firstParam = ((dynamic)options).First.FirstParam;
+                string secondParam = ((dynamic)options).Second.SecondParam;
 
                 firstParam.Should().Be("A");
                 secondParam.Should().Be("B");
@@ -102,40 +102,31 @@ namespace CommandParser.Tests {
         [InlineData("Any")]
         public void EmptyCommand_Test(params string[] args) {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
-            var command = new Command(fakeOperation);
 
-            bool success = command.TryParse(args ?? new string[0], out Action action);
+            new Command(fakeOperation)
+                .TryParse(args ?? new string[0], out Action action)
+                .Should().BeFalse();
 
-            success.Should().BeFalse();            
             action.Should().BeNull();            
         }
 
-        void Assert_NoParameters_Success(bool withRequiredSection, string[] args) {
+        void Assert_NoParameters_Success(bool withRequiredSection, string[] args, string[] expectedOptions) {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
-                .Optional("second", section => section.WithKeys("second"))
-                .Optional("third", section => section.WithKeys("third"));
+                .Optional("Second", section => section.WithKey("second"))
+                .Optional("Third", section => section.WithKey("third"));
 
             if(withRequiredSection)
-                command = command.Required("first", section => section.WithKeys("first"));
+                command = command.Required("First", section => section.WithKey("first"));
 
-            bool success = command.TryParse(args, out Action action);
+            command.TryParse(args, out Action action)
+                .Should().BeTrue();            
 
-            success.Should().BeTrue();            
             action.Should().NotBeNull();
 
-            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject options) => {
-                var expected = new List<string>();
-                foreach(var arg in args) {
-                    if(arg != "WRONG")
-                        expected.Add(arg);
-                    else
-                        break;
-                }                
-
-                options.Select(x => x.Key).Should().Equal(expected);                
-            });            
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject options) => options
+                .Select(x => x.Key).Should().Equal(expectedOptions));
 
             action();
 
@@ -146,15 +137,15 @@ namespace CommandParser.Tests {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
-                .Optional("second", section => section.WithKeys("second"))
-                .Optional("third", section => section.WithKeys("third"));
+                .Optional("Second", section => section.WithKey("second"))
+                .Optional("Third", section => section.WithKey("third"));
 
             if(withRequiredSection)
-                command = command.Required("first", section => section.WithKeys("first"));
+                command = command.Required("First", section => section.WithKey("first"));
 
-            bool success = command.TryParse(args ?? new string[0], out Action action);
+            command.TryParse(args ?? new string[0], out Action action)
+                .Should().BeFalse();            
 
-            success.Should().BeFalse();            
             action.Should().BeNull();
         }
     }
