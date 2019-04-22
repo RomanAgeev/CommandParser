@@ -21,7 +21,7 @@ namespace CommandParser.Tests {
         [InlineData("first second third WRONG", "First,Second,Third")]
         [InlineData("first second WRONG third", "First,Second")]
         [InlineData("first WRONG second third", "First")]
-        public void NoParameters_WithRequiredSection_Success_Test(string args, string expectedOptions) {
+        public void NoParameters_WithPrimarySection_Success_Test(string args, string expectedOptions) {
             Assert_NoParameters_Success(true, args.Split(" "), expectedOptions.Split(","));
         }
 
@@ -34,7 +34,7 @@ namespace CommandParser.Tests {
         [InlineData("third second", "Third,Second")]
         [InlineData("second WRONG third", "Second")]
         [InlineData("second third WRONG", "Second,Third")]
-        public void NoParameters_NoRequiredSection_Success_Test(string args, string expectedOptions) {         
+        public void NoParameters_NoPrimarySection_Success_Test(string args, string expectedOptions) {         
             Assert_NoParameters_Success(false, args.Split(" "), expectedOptions.Split(","));
         }        
 
@@ -45,7 +45,7 @@ namespace CommandParser.Tests {
         [InlineData("second")]
         [InlineData("third")]
         [InlineData("second third")]
-        public void NoParameters_WithRequiredSection_Fail_Test(string args) {
+        public void NoParameters_WithPrimarySection_Fail_Test(string args) {
             Assert_NoParameters_Fail(true, args.Split(" "));
         }
 
@@ -55,7 +55,7 @@ namespace CommandParser.Tests {
         [InlineData("WRONG second")]
         [InlineData("WRONG third")]
         [InlineData("WRONG second third")]
-        public void NoParameters_NoRequiredSection_Fail_Test(string args) {
+        public void NoParameters_NoPrimarySection_Fail_Test(string args) {
             Assert_NoParameters_Fail(false, args.Split(" "));
         }
 
@@ -66,7 +66,7 @@ namespace CommandParser.Tests {
             var args = new[] { "firstKey", "A", "secondKey", "B" };
 
             Action action = new Command(fakeOperation)
-                .Required("First",
+                .Primary("First",
                     section => section
                         .WithKey("firstKey")
                         .WithString("FirstParam"))
@@ -103,15 +103,15 @@ namespace CommandParser.Tests {
                 .Should().BeNull();
         }
 
-        void Assert_NoParameters_Success(bool withRequiredSection, string[] args, string[] expectedOptions) {
+        void Assert_NoParameters_Success(bool withPrimarySection, string[] args, string[] expectedOptions) {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
                 .Optional("Second", section => section.WithKey("second"))
                 .Optional("Third", section => section.WithKey("third"));
 
-            if(withRequiredSection)
-                command = command.Required("First", section => section.WithKey("first"));
+            if(withPrimarySection)
+                command = command.Primary("First", section => section.WithKey("first"));
 
             Action action = command.Parse(args);
 
@@ -125,15 +125,15 @@ namespace CommandParser.Tests {
             A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).MustHaveHappened();
         }
         
-        void Assert_NoParameters_Fail(bool withRequiredSection, string[] args) {
+        void Assert_NoParameters_Fail(bool withPrimarySection, string[] args) {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
                 .Optional("Second", section => section.WithKey("second"))
                 .Optional("Third", section => section.WithKey("third"));
 
-            if(withRequiredSection)
-                command = command.Required("First", section => section.WithKey("first"));
+            if(withPrimarySection)
+                command = command.Primary("First", section => section.WithKey("first"));
 
             command.Parse(args ?? new string[0])
                 .Should().BeNull();

@@ -8,7 +8,7 @@ namespace CommandParser {
     public class Command {
         readonly Action<ExpandoObject> action;        
         readonly List<(string, Section)> optionalSections = new List<(string, Section)>();
-        (string, Section)? requiredSection;
+        (string, Section)? primarySection;
 
         public Command(Action<ExpandoObject> action) {
             Guard.NotNull(action, nameof(action));
@@ -16,10 +16,10 @@ namespace CommandParser {
             this.action = action;
         }
 
-        public Command Required(string name, Func<Section, Section> sectionSetup) {
+        public Command Primary(string name, Func<Section, Section> sectionSetup) {
             Guard.NotNull(sectionSetup, nameof(sectionSetup));
 
-            requiredSection = (name, sectionSetup(new Section()));
+            primarySection = (name, sectionSetup(new Section()));
             return this;
         }
 
@@ -38,12 +38,12 @@ namespace CommandParser {
             var optionsDict = (IDictionary<string, object>)options;
             int offset = 0;            
 
-            if(requiredSection.HasValue) {                
-                (string name, Section section) = requiredSection.Value;
+            if(primarySection.HasValue) {                
+                (string name, Section section) = primarySection.Value;
 
-                var required = section.Parse(args);
-                if(required != null) {
-                    optionsDict[name] = required;
+                var primary = section.Parse(args);
+                if(primary != null) {
+                    optionsDict[name] = primary;
                     offset += section.Length;
                 }
                 else

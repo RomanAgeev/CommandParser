@@ -13,11 +13,11 @@ namespace CommandParser.Tests {
 
         public CommandProccessorTests() {
             processor.Register(operation1)
-                .Required("Operation1", section => section
+                .Primary("Operation1", section => section
                     .WithKey("operation1"));
 
             processor.Register(operation2)
-                .Required("Operation2", section => section
+                .Primary("Operation2", section => section
                     .WithKey("operation2"));
         }
 
