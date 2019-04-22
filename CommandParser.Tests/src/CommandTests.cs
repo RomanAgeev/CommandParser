@@ -79,16 +79,48 @@ namespace CommandParser.Tests {
             action.Should().NotBeNull();
 
             A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject result) => {
-                string firstParam = ((dynamic)result).First.FirstParam;
-                string secondParam = ((dynamic)result).Second.SecondParam;
+                var resultDict = (IDictionary<string, object>)result;
 
-                firstParam.Should().Be("A");
-                secondParam.Should().Be("B");
+                var firstDict = (IDictionary<string, object>)resultDict["First"];
+                var secondDict = (IDictionary<string, object>)resultDict["Second"];
+
+                firstDict.Should().NotBeNull();
+                secondDict.Should().NotBeNull();
+
+                firstDict["FirstParam"].Should().Be("A");
+                secondDict["SecondParam"].Should().Be("B");
             });            
 
             action();
 
             A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).MustHaveHappened();            
+        }
+
+        [Fact]
+        public void NotMatched_SecondarySections_Test() {
+            var fakeOperation = A.Fake<Action<ExpandoObject>>();
+
+            Action action = new Command(fakeOperation)
+                .Secondary("First",
+                    section => section
+                        .WithKey("first"))
+                .Secondary("Second",
+                    section => section
+                        .WithKey("second"))
+                .Parse(new[] { "first" });
+
+            action.Should().NotBeNull();
+
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject result) => {
+                var resultDict = (IDictionary<string, object>)result;
+
+                resultDict["First"].Should().NotBeNull();
+                resultDict["Second"].Should().BeNull();
+            });
+
+            action();
+
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).MustHaveHappened();
         }
 
         [Theory]
@@ -118,7 +150,9 @@ namespace CommandParser.Tests {
             action.Should().NotBeNull();
 
             A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject result) => result
-                .Select(x => x.Key).Should().Equal(expectedResult));
+                .Where(x => x.Value != null)
+                .Select(x => x.Key)
+                .Should().Equal(expectedResult));
 
             action();
 

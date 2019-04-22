@@ -38,6 +38,7 @@ namespace CommandParser {
             var resultDict = (IDictionary<string, object>)result;
             int offset = 0;            
 
+            // Parse primary section
             if(primarySection.HasValue) {                
                 (string name, Section section) = primarySection.Value;
 
@@ -50,6 +51,7 @@ namespace CommandParser {
                     return null;                
             }
 
+            // Parse secondary sections
             ExpandoObject secondary;
             var parsedSections = new List<(string, Section)>();
             do {
@@ -69,8 +71,15 @@ namespace CommandParser {
                 }
             }
             while(secondary != null && offset < args.Length);
+
+            // Fill not parsed secondary sections by nulls
+            foreach(var secondarySection in secondarySections.Except(parsedSections)) {
+                (string name, _) = secondarySection;
+
+                resultDict[name] = null;
+            }
             
-            if(resultDict.Count > 0)
+            if(offset > 0)
                 return () => this.action(result);
 
             return null;
