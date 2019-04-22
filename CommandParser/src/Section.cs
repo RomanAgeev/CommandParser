@@ -19,30 +19,30 @@ namespace CommandParser {
             return this;
         }
 
-        public Section WithString(string param) {
-            Guard.NotNull(param, nameof(param));
+        public Section WithString(string name) {
+            Guard.NotNull(name, nameof(name));
 
             Func<string, object> parse = x => x;
 
-            _param.Add((param, parse));
+            _param.Add((name, parse));
             return this;
         }
 
-        public Section WithInteger(string param) {
-            Guard.NotNull(param, nameof(param));
+        public Section WithInteger(string name) {
+            Guard.NotNull(name, nameof(name));
 
             Func<string, object> parse = x => int.TryParse(x, out int result) ? (int?)result : null;
             
-            _param.Add((param, parse));
+            _param.Add((name, parse));
             return this;
         }
 
-        public Section WithFlags<T>(string param) where T : struct {
-            Guard.NotNull(param, nameof(param));
+        public Section WithFlags<T>(string name) where T : struct {
+            Guard.NotNull(name, nameof(name));
 
             Func<string, object> parse = x => Enum.TryParse<T>(x, true, out T result) ? (Nullable<T>)result : null;
             
-            _param.Add((param, parse));
+            _param.Add((name, parse));
             return this;
         }
 
