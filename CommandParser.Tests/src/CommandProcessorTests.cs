@@ -7,13 +7,18 @@ using System.Dynamic;
 
 namespace CommandParser.Tests {
     public class CommandProccessorTests {
-        CommandProcessor processor = new CommandProcessor();
-        Action<ExpandoObject> operation1 = A.Fake<Action<ExpandoObject>>();
-        Action<ExpandoObject> operation2 = A.Fake<Action<ExpandoObject>>();
+        readonly CommandProcessor processor = new CommandProcessor();
+        readonly Action<ExpandoObject> operation1 = A.Fake<Action<ExpandoObject>>();
+        readonly Action<ExpandoObject> operation2 = A.Fake<Action<ExpandoObject>>();
 
         public CommandProccessorTests() {
-            processor.Register(operation1).Required("Operation1", section => section.WithKey("operation1"));
-            processor.Register(operation2).Required("Operation2", section => section.WithKey("operation2"));
+            processor.Register(operation1)
+                .Required("Operation1", section => section
+                    .WithKey("operation1"));
+
+            processor.Register(operation2)
+                .Required("Operation2", section => section
+                    .WithKey("operation2"));
         }
 
         [Fact]
@@ -30,9 +35,11 @@ namespace CommandParser.Tests {
             A.CallTo(() => operation2.Invoke(A<ExpandoObject>._)).MustHaveHappened();
         }
 
-        [Fact]
-        public void Parse_Fail_Test() {
-            processor.Parse(new[] { "WRONG" })
+        [Theory]
+        [InlineData("WRONG")]
+        [InlineData("")]
+        public void Parse_Fail_Test(string arg) {
+            processor.Parse(new[] { arg })
                 .Should().BeNull();
         }
     }
