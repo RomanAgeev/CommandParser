@@ -7,7 +7,7 @@ using System.Dynamic;
 namespace CommandParser {
     public class Command {
         readonly Action<ExpandoObject> action;        
-        readonly List<(string, Section)> optionalSections = new List<(string, Section)>();
+        readonly List<(string, Section)> secondarySections = new List<(string, Section)>();
         (string, Section)? primarySection;
 
         public Command(Action<ExpandoObject> action) {
@@ -23,11 +23,11 @@ namespace CommandParser {
             return this;
         }
 
-        public Command Optional(string name, Func<Section, Section> sectionSetup) {
+        public Command Secondary(string name, Func<Section, Section> sectionSetup) {
             Guard.NotNull(sectionSetup, nameof(sectionSetup));
 
             var section = (name, sectionSetup(new Section()));
-            optionalSections.Add(section);
+            secondarySections.Add(section);
             return this;
         }
 
@@ -50,25 +50,25 @@ namespace CommandParser {
                     return null;                
             }
 
-            ExpandoObject optional;
+            ExpandoObject secondary;
             var parsedSections = new List<(string, Section)>();
             do {
-                optional = null;                
+                secondary = null;                
                 string[] sectionArgs = args.Skip(offset).ToArray();
 
-                foreach(var optionalSection in optionalSections.Except(parsedSections)) {
-                    (string name, Section section) = optionalSection;                    
+                foreach(var secondarySection in secondarySections.Except(parsedSections)) {
+                    (string name, Section section) = secondarySection;                    
 
-                    optional = section.Parse(sectionArgs);                    
-                    if(optional != null) {
-                        optionsDict[name] = optional;
+                    secondary = section.Parse(sectionArgs);                    
+                    if(secondary != null) {
+                        optionsDict[name] = secondary;
                         offset += section.Length;
-                        parsedSections.Add(optionalSection);
+                        parsedSections.Add(secondarySection);
                         break;
                     }
                 }
             }
-            while(optional != null && offset < args.Length);
+            while(secondary != null && offset < args.Length);
             
             if(optionsDict.Count > 0)
                 return () => this.action(options);

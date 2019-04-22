@@ -70,7 +70,7 @@ namespace CommandParser.Tests {
                     section => section
                         .WithKey("firstKey")
                         .WithString("FirstParam"))
-                .Optional("Second",
+                .Secondary("Second",
                     section => section
                         .WithKey("secondKey")
                         .WithString("SecondParam"))
@@ -107,8 +107,8 @@ namespace CommandParser.Tests {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
-                .Optional("Second", section => section.WithKey("second"))
-                .Optional("Third", section => section.WithKey("third"));
+                .Secondary("Second", section => section.WithKey("second"))
+                .Secondary("Third", section => section.WithKey("third"));
 
             if(withPrimarySection)
                 command = command.Primary("First", section => section.WithKey("first"));
@@ -129,8 +129,8 @@ namespace CommandParser.Tests {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
-                .Optional("Second", section => section.WithKey("second"))
-                .Optional("Third", section => section.WithKey("third"));
+                .Secondary("Second", section => section.WithKey("second"))
+                .Secondary("Third", section => section.WithKey("third"));
 
             if(withPrimarySection)
                 command = command.Primary("First", section => section.WithKey("first"));
