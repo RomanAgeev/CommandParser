@@ -34,8 +34,8 @@ namespace CommandParser {
         public Action Parse(string[] args) {
             Guard.NotNull(args, nameof(args));
 
-            var options = new ExpandoObject();
-            var optionsDict = (IDictionary<string, object>)options;
+            var result = new ExpandoObject();
+            var resultDict = (IDictionary<string, object>)result;
             int offset = 0;            
 
             if(primarySection.HasValue) {                
@@ -43,7 +43,7 @@ namespace CommandParser {
 
                 var primary = section.Parse(args);
                 if(primary != null) {
-                    optionsDict[name] = primary;
+                    resultDict[name] = primary;
                     offset += section.Length;
                 }
                 else
@@ -61,7 +61,7 @@ namespace CommandParser {
 
                     secondary = section.Parse(sectionArgs);                    
                     if(secondary != null) {
-                        optionsDict[name] = secondary;
+                        resultDict[name] = secondary;
                         offset += section.Length;
                         parsedSections.Add(secondarySection);
                         break;
@@ -70,8 +70,8 @@ namespace CommandParser {
             }
             while(secondary != null && offset < args.Length);
             
-            if(optionsDict.Count > 0)
-                return () => this.action(options);
+            if(resultDict.Count > 0)
+                return () => this.action(result);
 
             return null;
         }

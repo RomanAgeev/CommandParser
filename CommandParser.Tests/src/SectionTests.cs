@@ -39,17 +39,17 @@ namespace CommandParser.Tests {
         [InlineData("key", "A", "B")]
         [InlineData("key", "A", "B", "abc", " ")]
         public void Parse_WithParams_Test(params string[] args) {
-            var option = new Section()
+            var result = new Section()
                 .WithKey("key")
                 .WithString("X")
                 .WithString("Y")
                 .Parse(args);
 
-            option.Should().NotBeNull();
+            result.Should().NotBeNull();
 
-            var optionDict = (IDictionary<string, object>)option;
-            optionDict["X"].Should().Be("A");
-            optionDict["Y"].Should().Be("B");
+            var resultDict = (IDictionary<string, object>)result;
+            resultDict["X"].Should().Be("A");
+            resultDict["Y"].Should().Be("B");
         }
 
         [Theory]
@@ -70,15 +70,15 @@ namespace CommandParser.Tests {
         [InlineData("A", null)]
         [InlineData("", null)]
         public void Parse_Integer(string arg, int? expected) {
-            var option = new Section()
+            var result = new Section()
                 .WithKey("key")
                 .WithInteger("X")
                 .Parse(new[] { "key", arg });
 
-            option.Should().NotBeNull();
+            result.Should().NotBeNull();
 
-            var optionDict = (IDictionary<string, object>)option;
-            optionDict["X"].Should().Be(expected);
+            var resultDict = (IDictionary<string, object>)result;
+            resultDict["X"].Should().Be(expected);
         }
 
         [Theory]
@@ -90,15 +90,15 @@ namespace CommandParser.Tests {
         [InlineData("WRONG", null)]
         [InlineData("", null)]
         public void Parse_Flags(string arg, TestFlags? expected) {
-            var option = new Section()
+            var result = new Section()
                 .WithKey("key")
                 .WithFlags<TestFlags>("X")
                 .Parse(new[] { "key", arg });
 
-            option.Should().NotBeNull();
+            result.Should().NotBeNull();
 
-            var optionDict = (IDictionary<string, object>)option;
-            optionDict["X"].Should().Be(expected);
+            var resultDict = (IDictionary<string, object>)result;
+            resultDict["X"].Should().Be(expected);
         }
     }
 }

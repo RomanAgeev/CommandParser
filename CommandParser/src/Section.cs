@@ -50,15 +50,15 @@ namespace CommandParser {
             Guard.NotNull(args, nameof(args));
 
             if(args.Length > _param.Count && args[0] == _key) {
-                var option = new ExpandoObject();
-                var optionDict = (IDictionary<string, object>)option;
+                var result = new ExpandoObject();
+                var resultDict = (IDictionary<string, object>)result;
 
                 for(int i = 0; i < _param.Count; i++) {
                     (string name, Func<string, object> parse) = _param[i];
-                    optionDict[name] = parse(args[i + 1]);
+                    resultDict[name] = parse(args[i + 1]);
                 }
 
-                return option;
+                return result;
             }
 
             return null;

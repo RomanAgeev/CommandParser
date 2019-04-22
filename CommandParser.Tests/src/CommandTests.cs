@@ -21,8 +21,8 @@ namespace CommandParser.Tests {
         [InlineData("first second third WRONG", "First,Second,Third")]
         [InlineData("first second WRONG third", "First,Second")]
         [InlineData("first WRONG second third", "First")]
-        public void NoParameters_WithPrimarySection_Success_Test(string args, string expectedOptions) {
-            Assert_NoParameters_Success(true, args.Split(" "), expectedOptions.Split(","));
+        public void NoParameters_WithPrimarySection_Success_Test(string args, string expectedResult) {
+            Assert_NoParameters_Success(true, args.Split(" "), expectedResult.Split(","));
         }
 
         [Theory]
@@ -34,8 +34,8 @@ namespace CommandParser.Tests {
         [InlineData("third second", "Third,Second")]
         [InlineData("second WRONG third", "Second")]
         [InlineData("second third WRONG", "Second,Third")]
-        public void NoParameters_NoPrimarySection_Success_Test(string args, string expectedOptions) {         
-            Assert_NoParameters_Success(false, args.Split(" "), expectedOptions.Split(","));
+        public void NoParameters_NoPrimarySection_Success_Test(string args, string expectedResult) {         
+            Assert_NoParameters_Success(false, args.Split(" "), expectedResult.Split(","));
         }        
 
         [Theory]
@@ -78,9 +78,9 @@ namespace CommandParser.Tests {
             
             action.Should().NotBeNull();
 
-            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject options) => {
-                string firstParam = ((dynamic)options).First.FirstParam;
-                string secondParam = ((dynamic)options).Second.SecondParam;
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject result) => {
+                string firstParam = ((dynamic)result).First.FirstParam;
+                string secondParam = ((dynamic)result).Second.SecondParam;
 
                 firstParam.Should().Be("A");
                 secondParam.Should().Be("B");
@@ -103,7 +103,7 @@ namespace CommandParser.Tests {
                 .Should().BeNull();
         }
 
-        void Assert_NoParameters_Success(bool withPrimarySection, string[] args, string[] expectedOptions) {
+        void Assert_NoParameters_Success(bool withPrimarySection, string[] args, string[] expectedResult) {
             var fakeOperation = A.Fake<Action<ExpandoObject>>();
 
             var command = new Command(fakeOperation)
@@ -117,8 +117,8 @@ namespace CommandParser.Tests {
 
             action.Should().NotBeNull();
 
-            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject options) => options
-                .Select(x => x.Key).Should().Equal(expectedOptions));
+            A.CallTo(() => fakeOperation.Invoke(A<ExpandoObject>._)).Invokes((ExpandoObject result) => result
+                .Select(x => x.Key).Should().Equal(expectedResult));
 
             action();
 
